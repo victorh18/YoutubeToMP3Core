@@ -23,10 +23,13 @@ namespace YoutubeDownloader.Controllers
             return Ok(video);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> TestThis()
+        [HttpGet("Playlist")]
+        public async Task<IActionResult> GetPlaylistMetadata(string url)
         {
-            return Ok("Hummmmm");
+            var client = new YoutubeClient();
+            var id = YoutubeClient.ParsePlaylistId(WebUtility.UrlDecode(url));
+            var playlist = await client.GetPlaylistAsync(id);
+            return Ok(playlist);
         }
 
         [Route("Playlist")]
