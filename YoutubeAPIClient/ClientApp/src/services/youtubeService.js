@@ -23,7 +23,7 @@ function download(url = '', format = 2) {
 
 function downloadPlaylist(url = '', format = 2) {
     const encoded = encodeURIComponent(url);
-
+    return axios.get(`${process.env.REACT_APP_API_URL}/Download/Playlist?url=${encoded}`).then(resp => resp.data);
 }
 
 export default youtubeService;
