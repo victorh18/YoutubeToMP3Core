@@ -28,5 +28,14 @@ namespace YoutubeDownloader.Controllers
         {
             return Ok("Hummmmm");
         }
+
+        [Route("Playlist")]
+        [HttpGet]
+        public async Task<IActionResult> GetPlaylistMetadata()
+        {
+            var client = new YoutubeClient();
+            var playlist = await client.GetPlaylistAsync("PLQLqnnnfa_fAkUmMFw5xh8Kv0S5voEjC9");
+            return Ok(playlist.Videos);
+        }
     }
 }

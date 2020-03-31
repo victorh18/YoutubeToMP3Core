@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using YoutubeExplode;
 using YoutubeExplode.Models.MediaStreams;
 using YoutubeAPI.Enums;
+using YoutubeAPI.Utils;
 
 namespace YoutubeDownloader.Controllers
 {
@@ -53,6 +54,35 @@ namespace YoutubeDownloader.Controllers
                 Console.WriteLine(ex.Message);
                 return NotFound();
             }  
+        }
+
+        [HttpGet]
+        [Route("Playlist")]
+        public async Task<IActionResult> DownloadPlaylist()
+        {
+            var client = new YoutubeClient();
+            //var playlistId = YoutubeClient.ParsePlaylistId(WebUtility.UrlDecode(url));
+            var playlistId = "PLQLqnnnfa_fAkUmMFw5xh8Kv0S5voEjC9";
+            var playlist = await client.GetPlaylistAsync(playlistId);
+
+            var vids = new Dictionary<string, MemoryStream>();
+            
+            foreach (var vid in playlist.Videos)
+            {
+                
+                var tempStream = new MemoryStream();
+                var infoSet = await client.GetVideoMediaStreamInfosAsync(vid.Id);
+                var downInfo = infoSet.Muxed.WithHighestVideoQuality();
+
+                await client.DownloadMediaStreamAsync(downInfo, tempStream);
+
+                vids.Add(vid.Title, tempStream);
+            }
+
+            var archivo = Utils.CreateZipFile(vids);
+            
+            archivo.Seek(0, SeekOrigin.Begin);
+            return new FileStreamResult(archivo, "application/octet-stream") { FileDownloadName = "test.zip" };
         }
 
     }
