@@ -1,7 +1,9 @@
 import axios from 'axios';
 const youtubeService = {
     getMetadata,
-    download
+    getPlaylistMeta,
+    download,
+    downloadPlaylist
 };
 
 function getMetadata(url = '') {
@@ -9,9 +11,19 @@ function getMetadata(url = '') {
     return axios.get(`${process.env.REACT_APP_API_URL}/Meta?url=${encoded}`).then(resp => resp.data);
 }
 
+function getPlaylistMeta(url = '') {
+    const encoded = encodeURIComponent(url);
+    return axios.get(`${process.env.REACT_APP_API_URL}/Meta/Playlist?url=${encoded}`).then(resp => resp.data);
+}
+
 function download(url = '', format = 2) {
     const encoded = encodeURIComponent(url);
     window.open(`${process.env.REACT_APP_API_URL}/Download?url=${encoded}&format=${format}`,'_blank');
+}
+
+function downloadPlaylist(url = '', format = 2) {
+    const encoded = encodeURIComponent(url);
+
 }
 
 export default youtubeService;
