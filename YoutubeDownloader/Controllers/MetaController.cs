@@ -14,13 +14,19 @@ namespace YoutubeDownloader.Controllers
     public class MetaController : ControllerBase
     {
 
-        [HttpGet("{url}")]
+        [HttpGet]
         public async Task<IActionResult> GetMetadata(string url)
         {
             var client = new YoutubeClient();
             var id = YoutubeClient.ParseVideoId(WebUtility.UrlDecode(url));
             var video = await client.GetVideoAsync(id);
             return Ok(video);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TestThis()
+        {
+            return Ok("Hummmmm");
         }
     }
 }

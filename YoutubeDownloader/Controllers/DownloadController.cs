@@ -17,7 +17,7 @@ namespace YoutubeDownloader.Controllers
     public class DownloadController : ControllerBase
     {
 
-        [HttpGet("{url}")]
+        [HttpGet]
         public async Task<IActionResult> Download(string url, FormatoDescarga format, string TiempoInicio, string TiempoFin)
         {
             try
