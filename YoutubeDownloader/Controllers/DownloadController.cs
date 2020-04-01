@@ -19,7 +19,7 @@ namespace YoutubeDownloader.Controllers
     {
 
         [HttpGet]
-        public async Task<IActionResult> Download(string url, FormatoDescarga format, string TiempoInicio, string TiempoFin)
+        public async Task<IActionResult> Download(string url = null, FormatoDescarga format = FormatoDescarga.mp3, TimeSpan? TiempoInicio = null, TimeSpan? TiempoFin = null)
         {
             try
             {
@@ -58,11 +58,11 @@ namespace YoutubeDownloader.Controllers
 
         [HttpGet]
         [Route("Playlist")]
-        public async Task<IActionResult> DownloadPlaylist()
+        public async Task<IActionResult> DownloadPlaylist(string url = null, FormatoDescarga format = FormatoDescarga.mp3, TimeSpan? TiempoInicio = null, TimeSpan? TiempoFin = null)
         {
             var client = new YoutubeClient();
-            //var playlistId = YoutubeClient.ParsePlaylistId(WebUtility.UrlDecode(url));
-            var playlistId = "PLQLqnnnfa_fAkUmMFw5xh8Kv0S5voEjC9";
+            var playlistId = YoutubeClient.ParsePlaylistId(WebUtility.UrlDecode(url));
+            //var playlistId = "PLQLqnnnfa_fAkUmMFw5xh8Kv0S5voEjC9";
             var playlist = await client.GetPlaylistAsync(playlistId);
 
             var vids = new Dictionary<string, MemoryStream>();
@@ -72,9 +72,22 @@ namespace YoutubeDownloader.Controllers
                 
                 var tempStream = new MemoryStream();
                 var infoSet = await client.GetVideoMediaStreamInfosAsync(vid.Id);
-                var downInfo = infoSet.Muxed.WithHighestVideoQuality();
+                MediaStreamInfo streamInfo;
+                switch (format)
+                {
+                    case FormatoDescarga.mp4:
+                        streamInfo = infoSet.Muxed.WithHighestVideoQuality();
+                        break;
+                    case FormatoDescarga.mp3:
+                        streamInfo = infoSet.Audio.WithHighestBitrate();
+                        break;
+                    default:
+                        format = FormatoDescarga.mp3;
+                        streamInfo = infoSet.Audio.WithHighestBitrate();
+                        break;
+                }
 
-                await client.DownloadMediaStreamAsync(downInfo, tempStream);
+                await client.DownloadMediaStreamAsync(streamInfo, tempStream);
 
                 vids.Add(vid.Title, tempStream);
             }
@@ -82,7 +95,7 @@ namespace YoutubeDownloader.Controllers
             var archivo = Utils.CreateZipFile(vids);
             
             archivo.Seek(0, SeekOrigin.Begin);
-            return new FileStreamResult(archivo, "application/octet-stream") { FileDownloadName = "test.zip" };
+            return new FileStreamResult(archivo, "application/octet-stream") { FileDownloadName = $"{playlist.Title}.zip" };
         }
 
     }
