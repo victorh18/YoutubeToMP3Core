@@ -35,13 +35,14 @@ namespace YoutubeAPI.Utils
 
         public static async Task<string> DownloadMP3Async(string url){
             var youtubeDL = new YoutubeDL();
-            youtubeDL.Options.FilesystemOptions.Output = @"%(title)s.%(ext)s";
+            string fileName = DateTime.Now.ToString("yyyyMMdd_HHmmssffff");
+            youtubeDL.Options.FilesystemOptions.Output = fileName + @".%(ext)s";
             youtubeDL.VideoUrl = url;
             youtubeDL.Options.PostProcessingOptions.ExtractAudio = true;
             youtubeDL.Options.PostProcessingOptions.AudioFormat = NYoutubeDL.Helpers.Enums.AudioFormat.mp3;
             youtubeDL.Options.PostProcessingOptions.AudioQuality = "0";
             await youtubeDL.DownloadAsync();
-            return youtubeDL.Info.Title + ".mp3"; 
+            return fileName + ".mp3"; 
         }
 
         public static async Task<string> DownloadMP4Async(string url){
@@ -55,4 +56,5 @@ namespace YoutubeAPI.Utils
             return youtubeDL.Info.Title + ".mp4"; 
         }
     }
+
 }
