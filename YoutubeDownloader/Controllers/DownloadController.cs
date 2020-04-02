@@ -49,44 +49,9 @@ namespace YoutubeDownloader.Controllers
 
         [HttpGet]
         [Route("Playlist")]
-        public async Task<IActionResult> DownloadPlaylist(string url = null, FormatoDescarga format = FormatoDescarga.mp3, TimeSpan? TiempoInicio = null, TimeSpan? TiempoFin = null)
+        public async Task<IActionResult> DownloadPlaylist(string url = null, FormatoDescarga format = FormatoDescarga.mp3)
         {
-            var client = new YoutubeClient();
-            var playlistId = YoutubeClient.ParsePlaylistId(WebUtility.UrlDecode(url));
-            //var playlistId = "PLQLqnnnfa_fAkUmMFw5xh8Kv0S5voEjC9";
-            var playlist = await client.GetPlaylistAsync(playlistId);
-
-            var vids = new Dictionary<string, MemoryStream>();
-            
-            foreach (var vid in playlist.Videos)
-            {
-                
-                var tempStream = new MemoryStream();
-                var infoSet = await client.GetVideoMediaStreamInfosAsync(vid.Id);
-                MediaStreamInfo streamInfo;
-                switch (format)
-                {
-                    case FormatoDescarga.mp4:
-                        streamInfo = infoSet.Muxed.WithHighestVideoQuality();
-                        break;
-                    case FormatoDescarga.mp3:
-                        streamInfo = infoSet.Audio.WithHighestBitrate();
-                        break;
-                    default:
-                        format = FormatoDescarga.mp3;
-                        streamInfo = infoSet.Audio.WithHighestBitrate();
-                        break;
-                }
-
-                await client.DownloadMediaStreamAsync(streamInfo, tempStream);
-
-                vids.Add(vid.Title, tempStream);
-            }
-
-            var archivo = Utils.CreateZipFile(vids);
-            
-            archivo.Seek(0, SeekOrigin.Begin);
-            return new FileStreamResult(archivo, "application/octet-stream") { FileDownloadName = $"{playlist.Title}.zip" };
+            return new FileStreamResult(await Utils.DownloadPlaylistMP3Async(url), "application/octet-stream") { FileDownloadName = $"files.zip"};
         }
 
     }
